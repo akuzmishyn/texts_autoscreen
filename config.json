@@ -1,0 +1,7 @@
+{
+  "game_name": "ruby_hit",
+  "branch": "dgm-dev",
+  "languages": ["de", "fr"],
+  "shifts": ["s=0,184,201,326;"]
+
+}
