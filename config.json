@@ -1,7 +1,7 @@
 {
   "game_name": "luxor_gold",
   "branch": "dgm-dev",
-  "languages": ["ru"],
+  "languages": ["en"],
   "shifts": {"bonus_game_shift":"s=0,102,55,10,106,146;", "free_spin_shift": "s=0,0,113,35,166,0;", "big_super_mega_win": "s=0,31,2,4,26,112;s=0,49,108,50,137,163;s=0,80,2,4,3,66;s=0,99,77,121,149,155;", "free_spin_shift_and_add_spins": "s=0,0,113,35,166,0;s=50,3,46,61,0;"}
 
 }
