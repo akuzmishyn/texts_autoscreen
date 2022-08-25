@@ -70,6 +70,8 @@ def start_testing():
 
         else:
             modes_checked = + 1
+            print(f'[{game}][{mode}]: in work [{modes_checked}/{lenght_modes}]')
+            print("===   ===   ===   ===")
             with sync_playwright() as p:
                 browser = p.chromium.launch(headless=False, channel="chrome")
                 page = browser.new_page()
@@ -80,7 +82,7 @@ def start_testing():
                         f"https://dgm-beta.ps-gamespace.com/launch?link_title={branch}&gameName={game}&partner="
                         f"{branch}-gs-beta-platform-new&key=test50000&viewid=gameFrame&lang={lang}")
                     time.sleep(15)
-                    pass
+                    correct_modes(game, page, lang, mode)
                     languages_checked += 1
                     print(f"[{lang}] CHECKED [{languages_checked}/{lenght_languages}]")
                     print("- - - - - - -")
