@@ -1,0 +1,3 @@
+all: ["en", "ru", "cs", "tr", "zh", "da", "de", "el", "es", "fi", "fr", "id", "it", "ja", "ko", "no", "pt", "ro", "sr", "sv", "th", "vi", "bg", "hr", "hu", "ua", "sk", "nl"],
+cert: ["en", "de", "ru", "hr", "es", "pt", "bg", "it", "nl", "sv", "da"]
+

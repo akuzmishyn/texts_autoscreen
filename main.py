@@ -6,6 +6,7 @@ from playwright.sync_api import sync_playwright
 
 
 def start_testing():
+
     with open("config.json") as file:
         config = json.load(file)
         game = config['game_name']
@@ -38,7 +39,7 @@ def start_testing():
                     page.goto(
                         f"https://dgm-beta.ps-gamespace.com/launch?link_title={branch}&gameName={game}_mob&partner="
                         f"{branch}-gs-beta-platform-new&key=test50000&viewid=gameFrame&lang={lang}")
-                    time.sleep(15)
+                    time.sleep(15)  #ВРЕМЯ ЗАГРУЗКИ ИГРЫ
                     correct_modes(game, page, lang, mode)
                     languages_checked += 1
                     print(f"[{lang}] CHECKED [{languages_checked}/{lenght_languages}]")
@@ -59,7 +60,7 @@ def start_testing():
                     page.goto(
                         f"https://dgm-beta.ps-gamespace.com/launch?link_title={branch}&gameName={game}_mob&partner="
                         f"{branch}-gs-beta-platform-new&key=test50000&viewid=gameFrame&lang={lang}")
-                    time.sleep(15)
+                    time.sleep(15)  #ВРЕМЯ ЗАГРУЗКИ ИГРЫ
                     correct_modes(game, page, lang, mode)
                     languages_checked += 1
                     print(f"[{lang}] CHECKED [{languages_checked}/{lenght_languages}]")
@@ -81,7 +82,7 @@ def start_testing():
                     page.goto(
                         f"https://dgm-beta.ps-gamespace.com/launch?link_title={branch}&gameName={game}&partner="
                         f"{branch}-gs-beta-platform-new&key=test50000&viewid=gameFrame&lang={lang}")
-                    time.sleep(15)
+                    time.sleep(15)  #ВРЕМЯ ЗАГРУЗКИ ИГРЫ
                     correct_modes(game, page, lang, mode)
                     languages_checked += 1
                     print(f"[{lang}] CHECKED [{languages_checked}/{lenght_languages}]")
@@ -172,13 +173,13 @@ def screen_big_mega_super_win(game_name, page, lang, mode):
     elif chk_screenshot_manual.get() == 1:
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
-        page.keyboard.press("Space")
-        time.sleep(7)
-        page.click('//*[@id="game_canvas"]')
-        time.sleep(1)
-        page.click('//*[text()="Open Controls"]')
-        page.wait_for_selector('//*[text()="pause"]').click()
-        page.wait_for_selector('//*[text()="Close Controls"]').click()
+        page.keyboard.press("Space")   #SPIN START
+        time.sleep(7) #Time waiting till next event
+        page.click('//*[@id="game_canvas"]')  #Click on game field
+        time.sleep(1) #Time waiting till next event
+        page.click('//*[text()="Open Controls"]') #Open Control
+        page.wait_for_selector('//*[text()="pause"]').click() #Pause the game
+        page.wait_for_selector('//*[text()="Close Controls"]').click() #Close the console
 
         screen_value = input("Make screenshot? : ")
         if screen_value == "y":
@@ -337,7 +338,7 @@ def screen_freespin_and_additional_pop_up(game_name, page, lang, mode):
         page.screenshot(path=f"{game_name}/{lang}/{mode}/free_spin_add_{lang}.png")
         print("Screen [Add Free Spin Pop Up] - done")
     elif chk_screenshot_manual.get() == 1:
-        screen_value = input("Make screenshot? : ")
+
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
@@ -348,6 +349,7 @@ def screen_freespin_and_additional_pop_up(game_name, page, lang, mode):
         page.wait_for_selector('//*[text()="Open Controls"]').click()
         page.wait_for_selector('//*[text()="pause"]').click()
         page.wait_for_selector('//*[text()="Close Controls"]').click()
+        screen_value = input("Make screenshot?: ")
         if screen_value == "y":
             page.screenshot(path=f"{game_name}/{lang}/{mode}/free_spin_add_{lang}.png")
             print("Screen [Add Free Spin Pop Up] - done")
@@ -372,7 +374,6 @@ def screen_bonus_game(game_name, page, lang, mode):
 
     new_tab_open(page, shifts)
 
-    screen_value = input("Make screenshot?: ")
     if chk_screenshot_all_time.get() == 1:
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
@@ -385,6 +386,7 @@ def screen_bonus_game(game_name, page, lang, mode):
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
         time.sleep(15)
+        screen_value = input("Make screenshot?: ")
         if screen_value == "y":
             page.screenshot(path=f"{game_name}/{lang}/{mode}/bonus_game_pop_up_{lang}.png")
             print("Screen [Bonus Game Pop Up] - done")
@@ -422,12 +424,15 @@ def screen_paytable(game_name, page, lang, mode):
                 page.screenshot(path=f"{game_name}/{lang}/{mode}/paytable_{lang}_{i}.png")
                 print(f"Screen [Paytable_{number_screen}] - done")
                 page.mouse.wheel(0, 125)
+
                 number_screen += 1
 
             else:
                 page.mouse.wheel(0, 125)
 
-        print("Screen [All Paytable] - done")
+        print("Checking [All Paytable] - done")
+        page.click('//*[@id="game_canvas"]')
+        page.keyboard.press("Escape")
     elif chk_without_screenshot.get() == 1:
         for i in range(10):
             time.sleep(1)
@@ -1913,7 +1918,7 @@ def correct_modes(game, page, lang, mode):
 
 
 window = Tk()
-window.geometry('320x400')
+window.geometry('250x400')
 window.title("Locals screenshots")
 
 fake_lbl = Label(window, text="")
@@ -1931,7 +1936,7 @@ page_size.grid(column=0, row=5)
 fake_lbl3 = Label(window, text="")
 fake_lbl3.grid(column=1, row=8)
 
-modes_choose = Label(window, text="Choose modes: ")
+modes_choose = Label(window, text="Modes: ")
 modes_choose.grid(column=0, row=9)
 
 chk_mobile_landscape_state = IntVar()
@@ -1971,27 +1976,27 @@ chkbtn_mobile_portrait.grid(column=1, row=6)
 chkbtn_desktop = Checkbutton(window, text="Desktop", variable=chk_desktop_state, onvalue=1, offvalue=0)
 chkbtn_desktop.grid(column=1, row=7)
 
-feature_preview_chkbtn = Checkbutton(window, text="Feature Preview".center(28), variable=chk_pop_up_state, onvalue=1,
+feature_preview_chkbtn = Checkbutton(window, text="Feature Preview", variable=chk_pop_up_state, onvalue=1,
                                      offvalue=0)
 feature_preview_chkbtn.grid(column=1, row=9)
 
-main_chkbtn = Checkbutton(window, text="  Main ".center(32), variable=chk_main_state, onvalue=1, offvalue=0)
+main_chkbtn = Checkbutton(window, text="Main", variable=chk_main_state, onvalue=1, offvalue=0)
 main_chkbtn.grid(column=1, row=10)
 
 big_mega_super_chkbtn = Checkbutton(window, text=" Big/Super/Mega Win ", variable=chk_big_super_mega_state, onvalue=1,
                                     offvalue=0)
 big_mega_super_chkbtn.grid(column=1, row=11)
 
-fs_chkbtn = Checkbutton(window, text="FS Pop Up".center(28), variable=chk_fs_pop_up_state, onvalue=1, offvalue=0)
+fs_chkbtn = Checkbutton(window, text="FS Pop Up", variable=chk_fs_pop_up_state, onvalue=1, offvalue=0)
 fs_chkbtn.grid(column=1, row=12)
 
-fs_add_chkbtn = Checkbutton(window, text="Additional FS".center(23), variable=chk_fs_add_state, onvalue=1, offvalue=0)
+fs_add_chkbtn = Checkbutton(window, text="Additional FS", variable=chk_fs_add_state, onvalue=1, offvalue=0)
 fs_add_chkbtn.grid(column=1, row=13)
 
-bg_chkbtn = Checkbutton(window, text="BG Pop Up".center(27), variable=chk_bg_state, onvalue=1, offvalue=0)
+bg_chkbtn = Checkbutton(window, text="BG Pop Up", variable=chk_bg_state, onvalue=1, offvalue=0)
 bg_chkbtn.grid(column=1, row=14)
 
-paytable_chkbtn = Checkbutton(window, text="Paytable".center(30), variable=chk_paytable_state, onvalue=1, offvalue=0)
+paytable_chkbtn = Checkbutton(window, text="Paytable", variable=chk_paytable_state, onvalue=1, offvalue=0)
 paytable_chkbtn.grid(column=1, row=15)
 
 fake_lbl4 = Label(window, text="")
