@@ -1,7 +1,7 @@
 {
-  "game_name": "royal_coins_2",
-  "branch": "dgm-dev",
-  "languages": ["fr"],
-  "shifts": {"bonus_game_shift":"s=0,80,105,306;", "free_spin_shift": "", "big_super_mega_win": "", "free_spin_shift_and_add_spins": ""},
-  "timings": {"game_start": "25", "skip_in_big_super_mega": "7", "time_to_fs": "15", "time_to_add_fs_in_fs": "10", "time_to_bg": "15", "count_of_scrolls_in_paytable": "12"}
+  "game_name": "",
+  "branch": "",
+  "languages": [],
+  "shifts": {"bonus_game_shift":"", "free_spin_shift": "", "big_super_mega_win": "", "free_spin_shift_and_add_spins": ""},
+  "timings": {"game_start": "15", "skip_in_big_super_mega": "7", "time_to_fs": "15", "time_to_add_fs_in_fs": "10", "time_to_bg": "15", "count_of_scrolls_in_paytable": "12"}
 }

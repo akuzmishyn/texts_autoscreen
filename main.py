@@ -6,7 +6,6 @@ from playwright.sync_api import sync_playwright
 
 
 def start_testing():
-
     with open("config.json") as file:
         config = json.load(file)
         game = config['game_name']
@@ -40,8 +39,8 @@ def start_testing():
                     page.goto(
                         f"https://dgm-beta.ps-gamespace.com/launch?link_title={branch}&gameName={game}_mob&partner="
                         f"{branch}-gs-beta-platform-new&key=test50000&viewid=gameFrame&lang={lang}")
-                    time.sleep(int(timings['game_start']))  #ВРЕМЯ ЗАГРУЗКИ ИГРЫ
-                    print("Tap 'ENTER'")
+                    time.sleep(int(timings['game_start']))  # ВРЕМЯ ЗАГРУЗКИ ИГРЫ
+                    print("'game_start' timing")
                     correct_modes(game, page, lang, mode)
                     languages_checked += 1
                     print(f"[{lang}] CHECKED [{languages_checked}/{lenght_languages}]")
@@ -62,15 +61,13 @@ def start_testing():
                     page.goto(
                         f"https://dgm-beta.ps-gamespace.com/launch?link_title={branch}&gameName={game}_mob&partner="
                         f"{branch}-gs-beta-platform-new&key=test50000&viewid=gameFrame&lang={lang}")
-                    time.sleep(int(timings['game_start']))  #ВРЕМЯ ЗАГРУЗКИ ИГРЫ
+                    time.sleep(int(timings['game_start']))  # ВРЕМЯ ЗАГРУЗКИ ИГРЫ
                     correct_modes(game, page, lang, mode)
                     languages_checked += 1
                     print(f"[{lang}] CHECKED [{languages_checked}/{lenght_languages}]")
                     print("- - - - - - -")
-
             print(f'[{game}][{mode}]: CHECKED [{modes_checked}/{lenght_modes}]')
             print("===============================")
-
         else:
             modes_checked += 1
             print(f'[{game}][{mode}]: in work [{modes_checked}/{lenght_modes}]')
@@ -84,7 +81,7 @@ def start_testing():
                     page.goto(
                         f"https://dgm-beta.ps-gamespace.com/launch?link_title={branch}&gameName={game}&partner="
                         f"{branch}-gs-beta-platform-new&key=test50000&viewid=gameFrame&lang={lang}")
-                    time.sleep(int(timings['game_start']))  #ВРЕМЯ ЗАГРУЗКИ ИГРЫ
+                    time.sleep(int(timings['game_start']))  # ВРЕМЯ ЗАГРУЗКИ ИГРЫ
                     correct_modes(game, page, lang, mode)
                     languages_checked += 1
                     print(f"[{lang}] CHECKED [{languages_checked}/{lenght_languages}]")
@@ -97,14 +94,14 @@ def screen_pop_up(game_name, page, lang, mode):
     if chk_screenshot_all_time.get() == 1:
 
         page.click('//*[@id="game_canvas"]')
-        page.screenshot(path=f"{game_name}/{lang}/{mode}/screen_pop_up_{lang}.png")
+        page.screenshot(path=f"{game_name}/{mode}_screen_pop_up_{lang}.png")
         print("Screen [Feature Preview Pop Up] - done")
         page.keyboard.press("Enter")
     elif chk_screenshot_manual.get() == 1:
         page.click('//*[@id="game_canvas"]')
-        screen_value = input("Make screenshot?: ")
+        screen_value = input("[FP] Make screenshot?: ")
         if screen_value == "y":
-            page.screenshot(path=f"{game_name}/{lang}/{mode}/screen_pop_up_{lang}.png")
+            page.screenshot(path=f"{game_name}/{mode}_screen_pop_up_{lang}.png")
             print("Screen [Feature Preview Pop Up] - done")
             page.keyboard.press("Enter")
         else:
@@ -117,13 +114,13 @@ def screen_pop_up(game_name, page, lang, mode):
 def screen_main(game_name, page, lang, mode):
     if chk_screenshot_all_time.get() == 1:
         page.click('//*[@id="game_canvas"]')
-        page.screenshot(path=f"{game_name}/{lang}/{mode}/main_{lang}.png")
+        page.screenshot(path=f"{game_name}/{mode}_main_{lang}.png")
         print("Screen [Main Game] - done")
     elif chk_screenshot_manual.get() == 1:
         page.click('//*[@id="game_canvas"]')
-        screen_value = input("Make screenshot?: ")
+        screen_value = input("[M] Make screenshot?: ")
         if screen_value == "y":
-            page.screenshot(path=f"{game_name}/{lang}/{mode}/main_{lang}.png")
+            page.screenshot(path=f"{game_name}/{mode}_main_{lang}.png")
             print("Screen [Main Game] - done")
         else:
             page.click('//*[@id="game_canvas"]')
@@ -146,20 +143,20 @@ def screen_big_mega_super_win(game_name, page, lang, mode):
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Space")
-        time.sleep(int(timings['skip_in_big_super_mega'])) #Время через которое делается скип
+        time.sleep(int(timings['skip_in_big_super_mega']))  # Время через которое делается скип
         page.click('//*[@id="game_canvas"]')
-        time.sleep(0.5) #Время через которое делается скрин после скипа
-        page.screenshot(path=f"{game_name}/{lang}/{mode}/screen_big_win_{lang}.png")
+        time.sleep(0.5)  # Время через которое делается скрин после скипа
+        page.screenshot(path=f"{game_name}/{mode}_screen_big_win_{lang}.png")
         print("Screen [Big Win Pop Up] - done")
         time.sleep(2)
         page.click('//*[text()="Open Controls"]')
         time.sleep(1)
         page.click('//*[text()="Close Controls"]')
         page.keyboard.press("Space")
-        time.sleep(int(timings['skip_in_big_super_mega'])) #Время через которое делается скип
+        time.sleep(int(timings['skip_in_big_super_mega']))  # Время через которое делается скип
         page.click('//*[@id="game_canvas"]')
-        time.sleep(0.5) #Время через которое делается скрин после скипа
-        page.screenshot(path=f"{game_name}/{lang}/{mode}/screen_mega_win_{lang}.png")
+        time.sleep(0.5)  # Время через которое делается скрин после скипа
+        page.screenshot(path=f"{game_name}/{mode}_screen_mega_win_{lang}.png")
         print("Screen [Mega Win Pop Up] - done")
         page.click('//*[@id="game_canvas"]')
         time.sleep(2)
@@ -167,26 +164,27 @@ def screen_big_mega_super_win(game_name, page, lang, mode):
         time.sleep(1)
         page.click('//*[text()="Close Controls"]')
         page.keyboard.press("Space")
-        time.sleep(int(timings['skip_in_big_super_mega'])) #Время через которое делается скип
+        time.sleep(int(timings['skip_in_big_super_mega']))  # Время через которое делается скип
         page.click('//*[@id="game_canvas"]')
         time.sleep(0.5)
-        page.screenshot(path=f"{game_name}/{lang}/{mode}/screen_super_win_{lang}.png")
+        page.screenshot(path=f"{game_name}/{mode}_screen_super_win_{lang}.png")
         print("Screen [Super Win Pop Up] - done")
         time.sleep(1)
     elif chk_screenshot_manual.get() == 1:
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
-        page.keyboard.press("Space")   #SPIN START
-        time.sleep(int(timings['skip_in_big_super_mega'])) #Время через которое делается скип
-        page.click('//*[@id="game_canvas"]')  #Click on game field
-        time.sleep(0.5) #Время через которое делается скрин после скипа
-        page.click('//*[text()="Open Controls"]') #Open Control
-        page.wait_for_selector('//*[text()="pause"]').click() #Pause the game
-        page.wait_for_selector('//*[text()="Close Controls"]').click() #Close the console
+        page.keyboard.press("Space")  # SPIN START
+        time.sleep(int(timings['skip_in_big_super_mega']))  # Время через которое делается скип
+        print("'skip_in_big_super_mega' timing")
+        page.click('//*[@id="game_canvas"]')  # Click on game field
+        time.sleep(0.5)  # Время через которое делается скрин после скипа
+        page.click('//*[text()="Open Controls"]')  # Open Control
+        page.wait_for_selector('//*[text()="pause"]').click()  # Pause the game
+        page.wait_for_selector('//*[text()="Close Controls"]').click()  # Close the console
 
-        screen_value = input("Make screenshot?: ")
+        screen_value = input("[BW] Make screenshot?: ")
         if screen_value == "y":
-            page.screenshot(path=f"{game_name}/{lang}/{mode}/screen_big_win_{lang}.png")
+            page.screenshot(path=f"{game_name}/{mode}_screen_big_win_{lang}.png")
             print("Screen [Big Win Pop Up] - done")
             time.sleep(1)
             page.wait_for_selector('//*[text()="Open Controls"]').click()
@@ -206,16 +204,16 @@ def screen_big_mega_super_win(game_name, page, lang, mode):
             time.sleep(2)
             page.keyboard.press("Enter")
 
-        time.sleep(int(timings['skip_in_big_super_mega'])) #Время через которое делается скип
+        time.sleep(int(timings['skip_in_big_super_mega']))  # Время через которое делается скип
         page.click('//*[@id="game_canvas"]')
         time.sleep(0.5)
         page.click('//*[text()="Open Controls"]')
         page.wait_for_selector('//*[text()="pause"]').click()
         page.wait_for_selector('//*[text()="Close Controls"]').click()
 
-        screen_value2 = input("Make screenshot?: ")
+        screen_value2 = input("[SW] Make screenshot?: ")
         if screen_value2 == "y":
-            page.screenshot(path=f"{game_name}/{lang}/{mode}/screen_super_win_{lang}.png")
+            page.screenshot(path=f"{game_name}/{mode}_screen_super_win_{lang}.png")
             print("Screen [Super Win Pop Up] - done")
             time.sleep(1)
             page.wait_for_selector('//*[text()="Open Controls"]').click()
@@ -243,9 +241,9 @@ def screen_big_mega_super_win(game_name, page, lang, mode):
         page.wait_for_selector('//*[text()="pause"]').click()
         page.wait_for_selector('//*[text()="Close Controls"]').click()
 
-        screen_value3 = input("Make screenshot? : ")
+        screen_value3 = input("[MW] Make screenshot?: ")
         if screen_value3 == "y":
-            page.screenshot(path=f"{game_name}/{lang}/{mode}/screen_mega_win_{lang}.png")
+            page.screenshot(path=f"{game_name}/{mode}_screen_mega_win_{lang}.png")
             print("Screen [Mega Win Pop Up] - done")
             time.sleep(1)
             page.wait_for_selector('//*[text()="Open Controls"]').click()
@@ -301,23 +299,24 @@ def screen_freespin_pop_up(game_name, page, lang, mode):
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_fs'])) # Время ожидания транзишина перехода из мейн гейма в фри спины
-        page.screenshot(path=f"{game_name}/{lang}/{mode}/free_spin_pop_up_{lang}.png")
+        time.sleep(int(timings['time_to_fs']))  # Время ожидания транзишина перехода из мейн гейма в фри спины
+        page.screenshot(path=f"{game_name}/{mode}_free_spin_pop_up_{lang}.png")
         print("Screen [Free Spin Pop Up] - done")
     elif chk_screenshot_manual.get() == 1:
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_fs'])) # Время ожидания транзишина перехода из мейн гейма в фри спины
-        screen_value = input("Make screenshot?: ")
+        time.sleep(int(timings['time_to_fs']))  # Время ожидания транзишина перехода из мейн гейма в фри спины
+        print("'time_to_fs' timings")
+        screen_value = input("[FS] Make screenshot?: ")
         if screen_value == "y":
-            page.screenshot(path=f"{game_name}/{lang}/{mode}/free_spin_pop_up_{lang}.png")
+            page.screenshot(path=f"{game_name}/{mode}_free_spin_pop_up_{lang}.png")
             print("Screen [Free Spin Pop Up] - done")
     elif chk_without_screenshot.get() == 1:
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_fs'])) # Время ожидания транзишина перехода из мейн гейма в фри спины
+        time.sleep(int(timings['time_to_fs']))  # Время ожидания транзишина перехода из мейн гейма в фри спины
 
 
 def screen_freespin_and_additional_pop_up(game_name, page, lang, mode):
@@ -335,36 +334,37 @@ def screen_freespin_and_additional_pop_up(game_name, page, lang, mode):
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_fs'])) # Время ожидания транзишина перехода из мейн гейма в фри спины
+        time.sleep(int(timings['time_to_fs']))  # Время ожидания транзишина перехода из мейн гейма в фри спины
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_add_fs_in_fs'])) # Время ожидания србатывания дополнительных фриспинов
+        time.sleep(int(timings['time_to_add_fs_in_fs']))  # Время ожидания србатывания дополнительных фриспинов
         page.click('//*[@id="game_canvas"]')
-        time.sleep(1) # Время через которое делается скриншот
-        page.screenshot(path=f"{game_name}/{lang}/{mode}/free_spin_add_{lang}.png")
+        time.sleep(1)  # Время через которое делается скриншот
+        page.screenshot(path=f"{game_name}/{mode}_free_spin_add_{lang}.png")
         print("Screen [Add Free Spin Pop Up] - done")
     elif chk_screenshot_manual.get() == 1:
 
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_fs'])) # Время ожидания транзишина перехода из мейн гейма в фри спины
+        time.sleep(int(timings['time_to_fs']))  # Время ожидания транзишина перехода из мейн гейма в фри спины
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_add_fs_in_fs'])) # Время ожидания србатывания дополнительных фриспинов
+        time.sleep(int(timings['time_to_add_fs_in_fs']))  # Время ожидания србатывания дополнительных фриспинов
+        print("'time_to_add_fs_in_fs' timings")
         page.click('//*[@id="game_canvas"]')
         page.wait_for_selector('//*[text()="Open Controls"]').click()
         page.wait_for_selector('//*[text()="pause"]').click()
         page.wait_for_selector('//*[text()="Close Controls"]').click()
-        screen_value = input("Make screenshot?: ")
+        screen_value = input("[aFS] Make screenshot?: ")
         if screen_value == "y":
-            page.screenshot(path=f"{game_name}/{lang}/{mode}/free_spin_add_{lang}.png")
+            page.screenshot(path=f"{game_name}/{mode}_free_spin_add_{lang}.png")
             print("Screen [Add Free Spin Pop Up] - done")
     elif chk_without_screenshot.get() == 1:
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_fs'])) # Время ожидания транзишина перехода из мейн гейма в фри спины
+        time.sleep(int(timings['time_to_fs']))  # Время ожидания транзишина перехода из мейн гейма в фри спины
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_add_fs_in_fs'])) # Время ожидания србатывания дополнительных фриспинов
+        time.sleep(int(timings['time_to_add_fs_in_fs']))  # Время ожидания србатывания дополнительных фриспинов
         page.click('//*[@id="game_canvas"]')
         time.sleep(1)
 
@@ -385,16 +385,17 @@ def screen_bonus_game(game_name, page, lang, mode):
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
         time.sleep(int(timings['time_to_bg']))  # Время ожидания транзишина перехода из мейн гейма в бонус игру
-        page.screenshot(path=f"{game_name}/{lang}/{mode}/bonus_game_pop_up_{lang}.png")
+        page.screenshot(path=f"{game_name}/{mode}_bonus_game_pop_up_{lang}.png")
         print("Screen [Bonus Game Pop Up] - done")
     elif chk_screenshot_manual.get() == 1:
         page.wait_for_selector('//*[text()="Close Controls"]').click()
         page.click('//*[@id="game_canvas"]')
         page.keyboard.press("Enter")
-        time.sleep(int(timings['time_to_bg'])) # Время ожидания транзишина перехода из мейн гейма в бонус игру
-        screen_value = input("Make screenshot?: ")
+        time.sleep(int(timings['time_to_bg']))  # Время ожидания транзишина перехода из мейн гейма в бонус игру
+        print("'time_to_bg' timing")
+        screen_value = input("[BG] Make screenshot?: ")
         if screen_value == "y":
-            page.screenshot(path=f"{game_name}/{lang}/{mode}/bonus_game_pop_up_{lang}.png")
+            page.screenshot(path=f"{game_name}/{mode}_bonus_game_pop_up_{lang}.png")
             print("Screen [Bonus Game Pop Up] - done")
     elif chk_without_screenshot.get() == 1:
         page.wait_for_selector('//*[text()="Close Controls"]').click()
@@ -420,7 +421,7 @@ def screen_paytable(game_name, page, lang, mode):
 
     if chk_screenshot_all_time.get() == 1:
         for i in range(int(timings['count_of_scrolls_in_paytable'])):
-            page.screenshot(path=f"{game_name}/{lang}/{mode}/paytable_{lang}_{i}.png")
+            page.screenshot(path=f"{game_name}/{mode}_paytable_{lang}_{i}.png")
             page.mouse.wheel(0, 125)
 
         print("Screen [All Paytable] - done")
@@ -429,9 +430,9 @@ def screen_paytable(game_name, page, lang, mode):
     elif chk_screenshot_manual.get() == 1:
         number_screen = 1
         for i in range(int(timings['count_of_scrolls_in_paytable'])):
-            screen_value = input(f"Make screenshot? [{i+1}/{int(timings['count_of_scrolls_in_paytable'])}]: ")
+            screen_value = input(f"[PT] Make screenshot? [{i + 1}/{int(timings['count_of_scrolls_in_paytable'])}]: ")
             if screen_value == "y":
-                page.screenshot(path=f"{game_name}/{lang}/{mode}/paytable_{lang}_{i}.png")
+                page.screenshot(path=f"{game_name}/{mode}_paytable_{lang}_{i}.png")
                 print(f"Screen [Paytable_{number_screen}] - done")
                 page.mouse.wheel(0, 125)
                 number_screen += 1
