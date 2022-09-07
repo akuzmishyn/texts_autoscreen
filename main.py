@@ -450,6 +450,57 @@ def screen_paytable(game_name, page, lang, mode):
         page.keyboard.press("Escape")
 
 
+def screen_total_win(game_name, page, lang, mode):
+    with open("config.json") as file:
+        config = json.load(file)
+        shifts = "".join(config['shifts'].get("total_win_shift"))
+        timings = config['timings']
+
+    page.wait_for_selector('//*[text()="Open Controls"]').click()
+    page.wait_for_selector('//*[text()="shifter"]').click()
+
+    new_tab_open(page, shifts)
+
+    if chk_screenshot_all_time.get() == 1:
+        page.wait_for_selector('//*[text()="Close Controls"]').click()
+        page.click('//*[@id="game_canvas"]')
+        page.keyboard.press("Enter")
+        time.sleep(int(timings['time_to_fs']))  # Время ожидания транзишина перехода из мейн гейма в фри спины
+        page.keyboard.press("Enter")
+        time.sleep(int(timings['time_to_total_win']))
+        page.click('//*[@id="game_canvas"]')
+        time.sleep(0.5)
+        page.screenshot(path=f"{game_name}/{mode}_total_win_pop_up_{lang}.png")
+        print("Screen [Total Win Pop Up] - done")
+    elif chk_screenshot_manual.get() == 1:
+        page.wait_for_selector('//*[text()="Close Controls"]').click()
+        page.click('//*[@id="game_canvas"]')
+        page.keyboard.press("Enter")
+        time.sleep(int(timings['time_to_fs']))  # Время ожидания транзишина перехода из мейн гейма в фри спины
+        page.keyboard.press("Enter")
+        time.sleep(int(timings['time_to_total_win']))
+        print("'time_to_total_win' timing")
+        page.click('//*[@id="game_canvas"]')
+        time.sleep(0.5)
+        page.click('//*[text()="Open Controls"]')  # Open Control
+        page.wait_for_selector('//*[text()="pause"]').click()  # Pause the game
+        page.wait_for_selector('//*[text()="Close Controls"]').click()
+        screen_value = input("[TW] Make screenshot?: ")
+        if screen_value == "y":
+            page.screenshot(path=f"{game_name}/{mode}_bonus_game_pop_up_{lang}.png")
+            print("Screen [Total Win Pop Up] - done")
+    elif chk_without_screenshot.get() == 1:
+        page.wait_for_selector('//*[text()="Close Controls"]').click()
+        page.click('//*[@id="game_canvas"]')
+        page.keyboard.press("Enter")
+        time.sleep(int(timings['time_to_fs']))  # Время ожидания транзишина перехода из мейн гейма в фри спины
+        page.keyboard.press("Enter")
+        time.sleep(int(timings['time_to_total_win']))
+        page.click('//*[@id="game_canvas"]')
+        time.sleep(0.5)
+        time.sleep(1)
+
+
 def new_tab_open(page, shift):
     with page.context.expect_page() as tab:
         new_tab = tab.value
@@ -471,231 +522,345 @@ def new_tab_open(page, shift):
 
 
 def correct_modes(game, page, lang, mode):
+    with open("config.json") as file:
+        config = json.load(file)
+        timings = config['timings']
+
     if chk_pop_up_state.get() == 1 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
     elif chk_pop_up_state.get() == 0 and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0) \
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
     elif chk_pop_up_state.get() == 0 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_big_mega_super_win(game, page, lang, mode)
     elif chk_pop_up_state.get() == 0 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
     elif chk_pop_up_state.get() == 0 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
     elif chk_pop_up_state.get() == 0 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
     elif chk_pop_up_state.get() == 0 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
+    elif chk_pop_up_state.get() == 0 and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0) \
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
     elif chk_pop_up_state.get() == 1 and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
     elif chk_pop_up_state.get() == 1 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
     elif chk_pop_up_state.get() == 1 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
     elif chk_pop_up_state.get() == 1 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
     elif chk_pop_up_state.get() == 1 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_bonus_game(game, page, lang, mode)
     elif chk_pop_up_state.get() == 1 and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
+    elif chk_pop_up_state.get() == 1 and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_total_win(game, page, lang, mode)
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_bonus_game(game, page, lang, mode)
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_total_win(game, page, lang, mode)
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(15)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(15)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(15)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_big_mega_super_win(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(15)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(15)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(15)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    #
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
-        screen_bonus_game(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
@@ -703,7 +868,8 @@ def correct_modes(game, page, lang, mode):
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
@@ -711,7 +877,8 @@ def correct_modes(game, page, lang, mode):
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_bonus_game(game, page, lang, mode)
@@ -719,569 +886,965 @@ def correct_modes(game, page, lang, mode):
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_total_win(game, page, lang, mode)
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_bonus_game(game, page, lang, mode)
 
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    #
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_total_win(game, page, lang, mode)
+
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
 
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_bonus_game(game, page, lang, mode)
 
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_total_win(game, page, lang, mode)
+
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
-        screen_bonus_game(game, page, lang, mode)
+        screen_total_win(game, page, lang, mode)
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
-            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
-        screen_freespin_pop_up(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0) \
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1) \
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
 
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
@@ -1289,373 +1852,844 @@ def correct_modes(game, page, lang, mode):
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1) \
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1) \
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     # 5
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
-    #
+
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
-            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+    #
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
@@ -1663,271 +2697,806 @@ def correct_modes(game, page, lang, mode):
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
 
-    #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
-            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1):
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
-        screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
-        screen_bonus_game(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
-    #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    #
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    #
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
-            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         page.keyboard.press("Enter")
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 0) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        page.keyboard.press("Enter")
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     # 6
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 0) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 0) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 0)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_main(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 0):
         screen_pop_up(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
 
-    #
-    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 1) and (
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
             chk_big_super_mega_state.get() == 1) \
-            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
-            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_paytable_state.get() == 0) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
         screen_pop_up(game, page, lang, mode)
-        screen_main(game, page, lang, mode)
-        screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 1) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 0) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_big_mega_super_win(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
+
+    elif (chk_pop_up_state.get() == 1) and (chk_main_state.get() == 0) and (
+            chk_big_super_mega_state.get() == 0) \
+            and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
+            and (chk_fs_add_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
+        screen_pop_up(game, page, lang, mode)
+        screen_paytable(game, page, lang, mode)
+        screen_freespin_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_freespin_and_additional_pop_up(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
     #
     if chk_pop_up_state.get() == 1 and (chk_main_state.get() == 1) and (
             chk_big_super_mega_state.get() == 1) \
             and (chk_paytable_state.get() == 1) and (chk_fs_pop_up_state.get() == 1) \
-            and (chk_fs_pop_up_state.get() == 1) and (chk_bg_state.get() == 1):
+            and (chk_fs_pop_up_state.get() == 1) and (chk_bg_state.get() == 1)\
+            and (chk_total_win_state.get() == 1):
         screen_pop_up(game, page, lang, mode)
         screen_main(game, page, lang, mode)
         screen_paytable(game, page, lang, mode)
         screen_big_mega_super_win(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_freespin_and_additional_pop_up(game, page, lang, mode)
         page.reload()
-        time.sleep(20)
+        time.sleep(int(timings['game_start']))
         page.keyboard.press("Enter")
         screen_bonus_game(game, page, lang, mode)
+        page.reload()
+        time.sleep(int(timings['game_start']))
+        page.keyboard.press("Enter")
+        screen_total_win(game, page, lang, mode)
 
 
 window = Tk()
-window.geometry('290x425')
-window.title("Locals screenshots")
+window.geometry('300x425')
+window.title("Screen tool")
 
 fake_lbl = Label(window, text="")
 fake_lbl.grid(column=3, row=0)
@@ -1957,9 +3526,11 @@ chk_fs_pop_up_state = IntVar()
 chk_fs_add_state = IntVar()
 chk_bg_state = IntVar()
 chk_paytable_state = IntVar()
+chk_total_win_state = IntVar()
 chk_screenshot_all_time = IntVar()
 chk_screenshot_manual = IntVar()
 chk_without_screenshot = IntVar()
+
 
 chkbtn_screenshot_all_time = Checkbutton(window, text="Auto screenshots", variable=chk_screenshot_all_time, onvalue=1,
                                          offvalue=0)
@@ -2007,10 +3578,14 @@ bg_chkbtn.grid(column=1, row=14)
 paytable_chkbtn = Checkbutton(window, text="Paytable", variable=chk_paytable_state, onvalue=1, offvalue=0)
 paytable_chkbtn.grid(column=1, row=15)
 
-fake_lbl4 = Label(window, text="")
-fake_lbl4.grid(column=0, row=16)
+total_wint_chkbtn = Checkbutton(window, text="Total Win", variable=chk_total_win_state, onvalue=1, offvalue=0)
+total_wint_chkbtn.grid(column=1, row=16)
 
-start_testing_btn = Button(window, text="Start locals testing", command=start_testing)
+fake_lbl4 = Label(window, text="")
+fake_lbl4.grid(column=0, row=17)
+
+
+start_testing_btn = Button(window, text="Start testing", command=start_testing)
 start_testing_btn.grid(column=1, row=18)
 
 window.mainloop()
